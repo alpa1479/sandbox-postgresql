@@ -1,0 +1,38 @@
+version: "3.8"
+
+# docker compose up --build
+services:
+
+  postgres:
+    image: postgres:${POSTGRES_VERSION}
+    hostname: postgres
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    volumes:
+      - ../relationships/many-to-many/01-many-to-many-schema.sql:/docker-entrypoint-initdb.d/01-many-to-many-schema.sql
+      - ../relationships/many-to-many/02-many-to-many-data.sql:/docker-entrypoint-initdb.d/02-many-to-many-data.sql
+
+      - ../relationships/one-to-many/01-one-to-many-schema.sql:/docker-entrypoint-initdb.d/01-one-to-many-schema.sql
+      - ../relationships/one-to-many/02-one-to-many-data.sql:/docker-entrypoint-initdb.d/02-one-to-many-data.sql
+
+      - ../relationships/one-to-one/01-one-to-one-schema.sql:/docker-entrypoint-initdb.d/01-one-to-one-schema.sql
+      - ../relationships/one-to-one/02-one-to-one-data.sql:/docker-entrypoint-initdb.d/02-one-to-one-data.sql
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-usr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pwd}
+      POSTGRES_DB: ${POSTGRES_DB:-examples}
+
+  pgadmin:
+    image: dpage/pgadmin4:${PGADMIN_VERSION}
+    hostname: pgadmin
+    ports:
+      - ${PGADMIN_PORT:-9090}:80
+    depends_on:
+      - postgres
+    volumes:
+      - ./pgadmin4/servers.json:/pgadmin4/servers.json
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-adm@adm.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-adm}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
